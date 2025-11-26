@@ -10,3 +10,5 @@ image # 1.5.33
 keyboard # 0.13.5
 pyautogui # 0.9.53
 pysimplegui # 4.60.3
+remi==2022.7.27
+pywebview==6.1
