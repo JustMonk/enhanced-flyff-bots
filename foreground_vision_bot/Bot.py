@@ -17,7 +17,7 @@ from pathlib import Path
 
 @throttle()
 def emit_msg(gui_window, color, msg):
-    gui_window.write_event_value(color, msg)
+    pass
 
 
 class Bot:
@@ -55,7 +55,7 @@ class Bot:
         self.mouse = HumanMouse(window_handler, self.wincap.get_screen_pos)
         self.keyboard = HumanKeyboard(window_handler)
         Thread(target=self.__frame_thread, daemon=True).start()
-        gui_window.write_event_value("msg_green", "Bot is ready.")
+        # gui_window.write_event_value("msg_green", "Bot is ready.")
 
     def start(self):
         self.__farm_thread_running = True
@@ -144,11 +144,13 @@ class Bot:
 
                 self.__check_inventory_open(debug=True)
                 self.__get_perin_converter_pos_if_available(debug=True)
-                self.gui_window.write_event_value("debug_frame", self.debug_frame)
+                # self.gui_window.write_event_value("debug_frame", self.debug_frame)
+                self.gui_window.render_image(self.debug_frame)
 
             fps_circular_buffer.append(time() - loop_time)
             fps = round(1 / (sum(fps_circular_buffer) / len(fps_circular_buffer)))
-            self.gui_window.write_event_value("video_fps", f"Video FPS: {fps}")
+            # self.gui_window.write_event_value("video_fps", f"Video FPS: {fps}")
+            self.gui_window.set_fps_value(fps)
             loop_time = time()
 
     def __farm_thread(self):
