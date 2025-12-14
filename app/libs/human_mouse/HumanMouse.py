@@ -4,6 +4,9 @@ import win32api, win32con, win32gui
 
 from libs.human_mouse.HumanCurve import HumanCurve
 
+import ctypes
+from ctypes import wintypes
+
 
 class HumanMouse:
     def __init__(self, hwnd, translator=None):
@@ -15,6 +18,15 @@ class HumanMouse:
 
         self.hwnd = hwnd
         self.translator = translator
+        self.user32 = ctypes.windll.user32
+
+    def get_cursor_pos(self):
+        """Get cursor position with error handling"""
+        point = wintypes.POINT()
+        if self.user32.GetCursorPos(ctypes.byref(point)):
+            return (point.x, point.y)
+        else:
+            raise WindowsError("Failed to get cursor position")
 
     def move(self, to_point, duration=0.5, translate=True, like_robot=False):
         """
@@ -33,10 +45,16 @@ class HumanMouse:
             sleep(0.05)
             return
 
-        from_point = win32api.GetCursorPos()
+        # from_point = win32api.GetCursorPos()
+        # point = wintypes.POINT()
+        # from_point = self.user32.GetCursorPos(ctypes.byref(point))
+        from_point = self.get_cursor_pos()
+        # print('>>> from_point: ', from_point)
         human_curve = HumanCurve(from_point, to_point, targetPoints=25)
         for point in human_curve.points:
-            win32api.SetCursorPos((int(round(point[0])), int(round(point[1]))))
+            # print('>>> point[0]: ', int(round(point[0])), ', point[1]: ', int(round(point[1])))
+            self.user32.SetCursorPos(int(round(point[0])), int(round(point[1])))
+            #win32api.SetCursorPos((int(round(point[0])), int(round(point[1]))))
             sleep(round(duration / len(human_curve.points), 3))
 
     def move_outside_game(self, duration=0.5, like_robot=False):

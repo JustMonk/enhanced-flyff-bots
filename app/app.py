@@ -19,8 +19,9 @@ def main():
     # gui.init()
     # gui.loop(bot)
     # gui.close()
-    start(MyApp, debug=True, address='0.0.0.0', port=8081, start_browser=True, multiple_instance=True, userdata=(bot,))
-    # start(MyApp, debug=True, standalone=True, userdata=(Bot,))
+    start(MyApp, debug=False, address='0.0.0.0', port=8081, start_browser=True, multiple_instance=True, userdata=(bot,))
+    # start(MyApp, debug=True, standalone=True, userdata=(bot,))
+    # start(MyApp, debug=False, standalone=True, userdata=(bot,))
 
 if __name__ == "__main__":
     print_logo("Flyff FVF")

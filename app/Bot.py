@@ -11,13 +11,15 @@ from libs.WindowCapture import WindowCapture
 from utils.decorators import throttle
 from utils.helpers import get_point_near_center, start_countdown
 from utils.SyncedTimer import SyncedTimer
+from key_sender import send_to_window
+from pynput.keyboard import Key, Controller
 
 import cv2 as cv
 from pathlib import Path
 
 @throttle()
 def emit_msg(gui_window, color, msg):
-    pass
+    gui_window.append_status_log(msg)
 
 
 class Bot:
@@ -56,10 +58,12 @@ class Bot:
         self.keyboard = HumanKeyboard(window_handler)
         Thread(target=self.__frame_thread, daemon=True).start()
         # gui_window.write_event_value("msg_green", "Bot is ready.")
+        gui_window.append_status_log("Bot is ready.")
 
     def start(self):
         self.__farm_thread_running = True
         Thread(target=self.__farm_thread, daemon=True).start()
+        Thread(target=self.__attack_target_thread, daemon=True).start()
 
     def stop(self):
         self.__farm_thread_running = False
@@ -157,12 +161,13 @@ class Bot:
         start_countdown(self.voice_engine, 3)
         current_mob_info_index = 0
         mobs_killed = 0
+        # TODO: set window active
 
         while True:
             if not len(self.config["selected_mobs"]) > 0:
                 continue
 
-            self.convert_penya_to_perins_timer()
+            # self.convert_penya_to_perins_timer()
 
             if current_mob_info_index > (len(self.config["selected_mobs"]) - 1):
                 current_mob_info_index = 0
@@ -196,36 +201,64 @@ class Bot:
                 break
 
     def __mobs_available_on_screen(self, current_mob, points, mobs_killed):
+        if self.__check_mob_existence():
+            return mobs_killed
+
         frame_w = self.frame.shape[1]
         frame_h = self.frame.shape[0]
         frame_center = (frame_w // 2, frame_h // 2)
 
         monsters_count = mobs_killed
         mob_pos = get_point_near_center(frame_center, points)
-        self.mouse.move(to_point=mob_pos, duration=0.1)
-        if self.__check_mob_existence():
-            self.mouse.left_click()
-            self.keyboard.hold_key(VKEY["F1"], press_time=0.06)
-            self.mouse.move_outside_game(duration=0.2)
-            fight_time = time()
-            while True:
-                if not self.__check_mob_still_alive(current_mob):
-                    monsters_count += 1
+        self.mouse.move(to_point=mob_pos, duration=0.01, like_robot=True)
+        # self.mouse.left_click()
+        # sleep(0.07)
+        # print('>>> trying to check if mob_existence', self.__check_mob_existence())
+
+        # print('>>> mob_existence, trying to click')
+        self.mouse.left_click()
+        if not self.__check_mob_existence():
+            # TODO: check active window (prevent input to miss target)
+            keyboard = Controller()
+            keyboard.press('s')
+            keyboard.release('s')
+            sleep(0.3)
+            return mobs_killed
+        # self.mouse.double_left_click()
+        # self.keyboard.hold_key(VKEY["F1"], press_time=0.06)
+        # self.keyboard.press_key(VKEY["F1"])
+
+        self.mouse.move_outside_game(duration=0.2)
+        fight_time = time()
+        while True:
+            if not self.__check_mob_still_alive(current_mob):
+                monsters_count += 1
+                break
+            else:
+                if (time() - fight_time) >= int(self.config["fight_time_limit_sec"]):
+                    # Unselect the mob if the fight limite is over
+                    self.keyboard.hold_key(VKEY["esc"], press_time=0.06)
                     break
-                else:
-                    if (time() - fight_time) >= int(self.config["fight_time_limit_sec"]):
-                        # Unselect the mob if the fight limite is over
-                        self.keyboard.hold_key(VKEY["esc"], press_time=0.06)
-                        break
-                    sleep(float(self.config["delay_to_check_mob_still_alive_sec"]))
+                sleep(float(self.config["delay_to_check_mob_still_alive_sec"]))
         return monsters_count
 
     def __mobs_not_available_on_screen(self):
+        # print("No Mobs in Area, moving.")
+        # self.keyboard.human_turn_back()
+        # self.keyboard.hold_key(VKEY["w"], press_time=4)
+        # sleep(0.1)
+        # self.keyboard.press_key(VKEY["s"])
+
         print("No Mobs in Area, moving.")
-        self.keyboard.human_turn_back()
-        self.keyboard.hold_key(VKEY["w"], press_time=4)
-        sleep(0.1)
-        self.keyboard.press_key(VKEY["s"])
+
+        # хотя по кругу бегать тоже идея
+        # self.keyboard.human_turn_back()
+        # self.keyboard.hold_key(VKEY["w"], press_time=0.5)
+        sleep(0.5)
+        # self.keyboard.press_key(VKEY["s"])
+        self.keyboard.hold_key(VKEY["a"], press_time=0.3)
+        sleep(0.3)
+        self.keyboard.press_key(VKEY["d"])
 
     def __convert_penya_to_perins(self):
         # Open the inventory
@@ -265,6 +298,13 @@ class Bot:
         # Close the inventory
         self.keyboard.press_key(VKEY["i"])
         return True
+    
+    def __attack_target_thread(self):
+        while True:
+            send_to_window(self.keyboard.hwnd, Key.f1)
+            sleep(0.5)
+            if not self.__farm_thread_running:
+                break
 
     """Match Methods"""
 
@@ -331,6 +371,22 @@ class Bot:
         )
         if debug:
             self.debug_frame = drawn_frame
+
+        if passed_threshold:
+            # print(f"Mob found! mob_existence_match_threshold: {max_val}")
+            return True
+        # print(f"No mob found! mob_existence_match_threshold: {max_val}")
+        return False
+    
+    def __check_target_mark(self):
+        _, _, _, passed_threshold, drawn_frame = CV.match_template(
+            frame=self.frame,
+            crop_area=(0, 0, 0, 0),
+            template=GeneralAssets.TARGET_MARK,
+            threshold=float(self.config["mob_existence_match_threshold"]),
+            frame_to_draw=None,
+            text_to_draw=None,
+        )
 
         if passed_threshold:
             # print(f"Mob found! mob_existence_match_threshold: {max_val}")
