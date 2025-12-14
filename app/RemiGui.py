@@ -139,7 +139,7 @@ class MyApp(App):
         listener_thread.start()
 
         # the margin 0px auto centers the main container
-        mainWrapperContainer = gui.Container(width=540, margin='0px auto', style={'display': 'block', 'overflow': 'hidden', 'padding': '20px'})
+        mainWrapperContainer = gui.Container(width=540, margin='0px auto', style={'display': 'block', 'overflow': 'hidden', 'padding': '20px', 'box-shadow': 'none', 'background': 'transparent'})
         self.mainWrapperContainer = mainWrapperContainer
 
         mainWrapperContainer.append(Logo())
@@ -345,9 +345,6 @@ class MyApp(App):
         # </------------------ [OPTIONS BLOCK] ------------------>
 
         # <------------------ [STATUS BLOCK] ------------------>
-        statusContainer = gui.Container(margin='0px auto', style={'display': 'block', 'overflow': 'hidden', 'box-shadow': '0px 0px 9px 1px #00000040', 'width': '100%', 'box-shadow': '0px 0px 9px 1px #00000040', 'margin-top': '20px'})
-        statusContainerLabel = gui.Label('Status', width=200, height=30, margin='10px')
-
         self.txt = gui.TextInput(single_line=False, height=150, margin='10px', style={'width': '90%', 'padding': '5px'})
         self.txt.set_text('UI started')
         self.txt.attributes['readonly'] = '1'
@@ -476,7 +473,7 @@ class MyApp(App):
         folder_path = BASE_DIR / "assets" / "_temp"
         folder_path.mkdir(parents=True, exist_ok=True)
 
-        fileInput = gui.FileUploader('./assets/_temp/', width=200, height=30, margin='10px')
+        fileInput = gui.FileUploader(folder_path, width=200, height=30, margin='10px')
         fileInput.filename = None
         def save_raw_file(widget, filename):
             widget.filename = filename
@@ -493,10 +490,13 @@ class MyApp(App):
         dialog.show(self)
 
     def on_add_mob_dialog_confirm(self, dialog):
+        BASE_DIR = Path(__file__).parent
+        img_temp_folder_path = BASE_DIR / "assets" / "_temp"
+
         values = {
             'name': dialog.get_field('mobNameInput').get_value(),
             'map': dialog.get_field('locNameInput').get_value(),
-            'image': './assets/_temp/' + dialog.get_field('fileInput').filename,
+            'image': img_temp_folder_path / dialog.get_field('fileInput').filename,
             'height': dialog.get_field('heightOffsetInput').get_value(),
             'element': dialog.get_field('elementDropdownInput').get_value(),
         }

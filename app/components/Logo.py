@@ -9,9 +9,10 @@ class Logo(Container):
         super().__init__(*args, **kwargs)
 
         self.set_layout_orientation(kwargs.get('layout_orientation', Container.LAYOUT_VERTICAL))
+        self.set_style({'background': 'transparent'})
 
         self.logo_wrapper = Container(
-            style={'margin-bottom': '10px', 'position': 'relative'}, 
+            style={'margin-bottom': '10px', 'position': 'relative', 'background': 'transparent'}, 
             # _class='logoWrapper'
         )
         

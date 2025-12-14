@@ -11,7 +11,7 @@ class SectionCard(Container):
 
         self.set_layout_orientation(kwargs.get('layout_orientation', Container.LAYOUT_VERTICAL))
 
-        self.set_style({'padding': '20px', 'margin-bottom': '10px', 'display': 'block', 'overflow': 'hidden', 'box-shadow': '0px 0px 9px 1px #00000040', 'width': 'auto', 'box-shadow': '0px 0px 9px 1px #00000040'})
+        self.set_style({'padding': '20px', 'margin-bottom': '10px', 'display': 'block', 'overflow': 'hidden', 'box-shadow': '0px 3px 1px -2px rgba(0,0,0,0.2),0px 2px 2px 0px rgba(0,0,0,0.14),0px 1px 5px 0px rgba(0,0,0,0.12)', 'width': 'auto', 'border-radius': '4px'})
 
         self.card_wrapper = Container(
             margin='0px auto',

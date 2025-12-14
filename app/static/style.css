@@ -1,3 +1,7 @@
+body {
+  background: #f9f9f9;
+}
+
 @font-face {
   font-family: 'CuteDino';
   src: url('/static:fonts/CuteDino2/cute_dino.ttf') format('truetype');
