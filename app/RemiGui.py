@@ -32,6 +32,7 @@ from components.SectionCard import SectionCard
 from hotkey import global_listener
 from key_sender import send_to_window
 from pynput.keyboard import Key
+import shutil
 
 class MyApp(App):
     def __new__(cls, *args, **kwargs):
@@ -64,6 +65,10 @@ class MyApp(App):
         res_path = os.path.join(os.path.dirname(__file__), 'static')
         self.show_bot_vision = False
         super(MyApp, self).__init__(*args, static_file_path={'static': res_path})
+
+        temp_folder_path = Path(__file__).parent / "assets" / "_temp"
+        if temp_folder_path.exists():
+            shutil.rmtree(temp_folder_path)
 
     def load_config(self):
         """Load configuration from file"""
