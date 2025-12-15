@@ -150,7 +150,7 @@ class MyApp(App):
         mainWrapperContainer.append(Logo())
 
         # <------------------ [ACTIONS BLOCK] ------------------>
-        self.actionsContainer_attach_bt = gui.Button('Attach window', width=200, height=30, margin='10px')
+        self.actionsContainer_attach_bt = gui.Button('Attach window', width='100%', margin='10px', _class='Button main-button')
         self.actionsContainer_attach_bt.onclick.do(self.open_attach_window_popup)
         
         self.actionsContainer_start_bt = gui.Button('Start', width=200, height=30, margin='10px')
@@ -158,6 +158,9 @@ class MyApp(App):
 
         self.actionsContainer_stop_bt = gui.Button('Stop (alt+s)', width=200, height=30, margin='10px')
         self.actionsContainer_stop_bt.onclick.do(lambda w: self.stop_bot())
+
+        self.start_stop_bt = gui.Button('Start', width='100%', margin='10px', _class='Button main-button disabled-button')
+        self.start_stop_bt.onclick.do(self.toggle_bot_state)
 
         self.actionsContainer_exit_bt = gui.Button('Exit', width=200, height=30, margin='10px')
         self.actionsContainer_exit_bt.onclick.do(self.exit)
@@ -170,10 +173,11 @@ class MyApp(App):
         actionsCard = SectionCard([
             gui.Container([
                 self.actionsContainer_attach_bt,
-                self.actionsContainer_start_bt,
-                self.actionsContainer_stop_bt,
-                self.actionsContainer_exit_bt
-            ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'flex'}),
+                self.start_stop_bt
+                # self.actionsContainer_start_bt,
+                # self.actionsContainer_stop_bt,
+                # self.actionsContainer_exit_bt
+            ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'flex', 'justify-content': 'space-around'}),
             self.actionsContainer_current_attached_label,
             # self.send_keys_bt
         ], header='Actions')
@@ -181,11 +185,11 @@ class MyApp(App):
         # </------------------ [ACTIONS BLOCK] ------------------>
 
         # <------------------ [MOBS BLOCK] ------------------>
-        self.mobsContainer_select_mobs_bt = gui.Button('Select mobs', width=200, height=30, margin='10px')
+        self.mobsContainer_select_mobs_bt = gui.Button('Select mobs', margin='10px', _class='Button main-button')
         self.mobsContainer_select_mobs_bt.onclick.do(self.open_select_mobs_dialog)
-        self.mobsContainer_add_mob_bt = gui.Button('Add mob', width=200, height=30, margin='10px')
+        self.mobsContainer_add_mob_bt = gui.Button('Add mob', margin='10px', _class='Button main-button')
         self.mobsContainer_add_mob_bt.onclick.do(self.open_add_mob_dialog)
-        self.mobsContainer_delete_mobs_bt = gui.Button('Delete mobs', width=200, height=30, margin='10px')
+        self.mobsContainer_delete_mobs_bt = gui.Button('Delete mobs', margin='10px', _class='Button main-button')
         self.mobsContainer_delete_mobs_bt.onclick.do(self.open_delete_mob_dialog)
 
         mobsCard = SectionCard([
@@ -238,7 +242,7 @@ class MyApp(App):
         ])
         
         thresholdContainer = gui.Container([
-            gui.Label('threshold options', width=200, height=30, margin='10px'),
+            gui.Label('Threshold options', width=200, margin='10px', style={'font-weight': 'bold'}),
             gui.Container([
                 LabeledSlider(
                     label="Mob position match threshold",
@@ -266,7 +270,7 @@ class MyApp(App):
                     on_change=lambda w, v: self.set_config(inventory_icons_match_threshold=float(v))
                 )
             ], style={'display': 'flex', 'flex-wrap': 'wrap'})
-        ], style={'border': '1px solid grey'})
+        ], style={'border-top': '1px solid #d7d7d7', 'border-bottom': '1px solid #d7d7d7', 'margin': '10px 0px', 'padding': '10px 0px'})
 
         combatSettingsContainer = gui.Container(margin='0px auto', style={'padding': '10px', 'display': 'flex', 'flex-wrap': 'wrap'})
         combatSettings_mobs_kill_goal_label = gui.Label('Mobs kill goal', width=100, style={'height': 'auto', 'margin-left': '10px', 'margin-top': '10px'})
@@ -416,7 +420,9 @@ class MyApp(App):
         handlers = get_window_handlers()
         game_window_name, game_window_handler = select_value, handlers[select_value]
         self.bot.setup(game_window_handler, self)
-
+        
+        # unlock start button
+        self.start_stop_bt.remove_class('disabled-button')
         # Close the dialog
         dialog.hide()
 
@@ -546,6 +552,17 @@ class MyApp(App):
 
     def stop_bot(self):
         self.bot.stop()
+
+    def toggle_bot_state(self, widget):
+        if not self.config.get('attached_window'):
+            return
+
+        if not self.bot.is_running:
+            self.bot.start()
+            widget.set_text('Stop (alt+s)')
+        else:
+            self.bot.stop()
+            widget.set_text('Start')
 
 if __name__ == "__main__":
     # starts the webserver

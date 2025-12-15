@@ -10,9 +10,9 @@ class LabeledSlider(Container):
 
         self.set_layout_orientation(kwargs.get('layout_orientation', Container.LAYOUT_VERTICAL))
         
-        self.input_value_text = Label(str(value), width=200, style={'height': 'auto', 'margin-left': '10px', 'margin-top': '10px', 'text-align': 'center'})
+        self.input_value_text = Label(str(value), width=50, style={'height': 'auto', 'text-align': 'center', 'background': '#007ec2', 'color': 'white', 'border-radius': '50px', 'padding': '2px 0px'})
         # TODO: slider params надо принимать отдельным аргументом 
-        self.slider = Slider(0.25, 0.10, 0.90, 0.05, width=200, height=20, margin='10px')
+        self.slider = Slider(0.25, 0.10, 0.90, 0.05, width=200, height=20)
         self.slider.attr_value = value
         def slider_onchange(w, v):
             self.input_value_text.set_text(str(v))
@@ -20,7 +20,7 @@ class LabeledSlider(Container):
         self.slider.onchange.do(slider_onchange)
 
         self.append([
-            Label(label, width=200, style={'height': 'auto', 'margin-left': '10px', 'margin-top': '10px'}),
+            Label(label, width=200, style={'height': 'auto'}),
             self.input_value_text,
             self.slider
         ])

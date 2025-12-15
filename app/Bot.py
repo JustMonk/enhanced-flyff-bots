@@ -44,6 +44,7 @@ class Bot:
         self.frame = None
         self.debug_frame = None
         self.__farm_thread_running = False
+        self.is_running = False
 
         # Synced Timers
         self.convert_penya_to_perins_timer = SyncedTimer(
@@ -61,11 +62,13 @@ class Bot:
         gui_window.append_status_log("Bot is ready.")
 
     def start(self):
+        self.is_running = True
         self.__farm_thread_running = True
         Thread(target=self.__farm_thread, daemon=True).start()
         Thread(target=self.__attack_target_thread, daemon=True).start()
 
     def stop(self):
+        self.is_running = False
         self.__farm_thread_running = False
 
     def set_config(self, **options):

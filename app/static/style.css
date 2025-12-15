@@ -1,5 +1,6 @@
 body {
-  background: #f9f9f9;
+  /*background: #f9f9f9;*/
+  background: #ecf3f5;
 }
 
 @font-face {
@@ -7,8 +8,41 @@ body {
   src: url('/static:fonts/CuteDino2/cute_dino.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Geologica';
+  src: url('/static:fonts/Geologica/Geologica.woff2') format('woff2');
+}
+
 .LogoText {
-    font-family: 'CuteDino' !important;
-    color: #007ec2;
-    text-shadow: 1px 3px 0px #bfcdff;
+  font-family: 'CuteDino' !important;
+  color: #007ec2;
+  text-shadow: 1px 3px 0px #bfcdff;
+}
+
+.disabled-button {
+  cursor: not-allowed !important;
+  opacity: 0.3;
+}
+
+.main-button {
+  box-shadow: none !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+}
+
+.main-button:hover {
+  background: #003b7f !important;
+}
+
+.card-header {
+  font-family: 'Geologica' !important;
+  font-size: 25px !important;
+}
+
+.LabeledSlider {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 10px;
+  justify-content: space-between;
 }
