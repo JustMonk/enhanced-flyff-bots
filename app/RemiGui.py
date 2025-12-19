@@ -127,7 +127,7 @@ class MyApp(App):
     
     def on_stop_hotkey(self):
         print("Stop hotkey triggered, bot is going to stop...")
-        self.bot.stop()
+        self.stop_bot()
 
     def main(self, bot):
         self.page.children['head'].add_child('additional_headdata', '<link rel="stylesheet" href="/static:style.css">')
@@ -550,20 +550,20 @@ class MyApp(App):
 
     def start_bot(self):
         self.bot.start()
+        self.start_stop_bt.set_text('Stop (alt+s)')
 
     def stop_bot(self):
         self.bot.stop()
+        self.start_stop_bt.set_text('Start')
 
     def toggle_bot_state(self, widget):
         if not self.config.get('attached_window'):
             return
 
         if not self.bot.is_running:
-            self.bot.start()
-            widget.set_text('Stop (alt+s)')
+            self.start_bot()
         else:
-            self.bot.stop()
-            widget.set_text('Start')
+            self.stop_bot()
 
 if __name__ == "__main__":
     # starts the webserver
