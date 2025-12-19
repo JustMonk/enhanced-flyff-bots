@@ -66,10 +66,6 @@ class MyApp(App):
         self.show_bot_vision = False
         super(MyApp, self).__init__(*args, static_file_path={'static': res_path})
 
-        temp_folder_path = Path(__file__).parent / "assets" / "_temp"
-        if temp_folder_path.exists():
-            shutil.rmtree(temp_folder_path)
-
     def load_config(self):
         """Load configuration from file"""
         try:
@@ -517,6 +513,11 @@ class MyApp(App):
             name=values["name"], map_name=values["map"], image_path=values["image"],
             height_offset=int(values["height"]), element=values["element"]
         )
+
+        # clear temp folder
+        temp_folder_path = Path(__file__).parent / "assets" / "_temp"
+        if temp_folder_path.exists():
+            shutil.rmtree(temp_folder_path)
 
         dialog.hide()
 
