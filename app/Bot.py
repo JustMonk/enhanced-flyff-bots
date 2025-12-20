@@ -204,7 +204,7 @@ class Bot:
                 break
 
     def __mobs_available_on_screen(self, current_mob, points, mobs_killed):
-        if self.__check_mob_existence():
+        if self.__check_mob_still_alive(current_mob):
             return mobs_killed
 
         frame_w = self.frame.shape[1]
