@@ -38,7 +38,7 @@ class RemiApp(App):
         instance.config_file = Path("app_config.json")
         instance.config = {
             # app config
-            'attached_window': None,
+            # 'attached_window': None,
             # show_bot_vision: always False
             # bot show options
             'show_matches_text': True,
@@ -62,6 +62,7 @@ class RemiApp(App):
     def __init__(self, *args, **kwargs):
         res_path = os.path.join(os.path.dirname(__file__), 'static')
         self.show_bot_vision = False
+        self.attached_window = None
         super(RemiApp, self).__init__(*args, static_file_path={'static': res_path})
 
     def load_config(self):
@@ -350,8 +351,8 @@ class RemiApp(App):
         # Add input fields to the dialog
         handlers = get_window_handlers()
         dropdown = gui.DropDown.new_from_list(list(handlers.keys()), width=200, height=20, margin='10px')
-        if self.config.get('attached_window'):
-            dropdown.select_by_value(self.config['attached_window'])
+        if self.attached_window:
+            dropdown.select_by_value(self.attached_window)
         dialog.add_field('select', dropdown)
 
         # Add confirm button
@@ -367,7 +368,7 @@ class RemiApp(App):
         # Access input values
         select_value = dialog.get_field('select').get_value()
 
-        self.config['attached_window'] = select_value
+        self.attached_window = select_value
         self.actionsContainer_current_attached_label.set_text(str(select_value))
 
         handlers = get_window_handlers()
@@ -550,7 +551,7 @@ class RemiApp(App):
         self.start_stop_bt.set_text('Start')
 
     def toggle_bot_state(self, widget):
-        if not self.config.get('attached_window'):
+        if not self.attached_window:
             return
 
         if not self.bot.is_running:
