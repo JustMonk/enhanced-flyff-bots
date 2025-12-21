@@ -54,7 +54,7 @@ class RemiApp(App):
             "mobs_kill_goal": None,
             "fight_time_limit_sec": 8,
             "delay_to_check_mob_still_alive_sec": 0.25,
-            "convert_penya_to_perins_timer_min": 30,
+            # "convert_penya_to_perins_timer_min": 30,
             "selected_mobs": [],
         }
         return instance
@@ -100,7 +100,7 @@ class RemiApp(App):
             mobs_kill_goal=self.config.get('mobs_kill_goal'),
             fight_time_limit_sec=self.config.get('fight_time_limit_sec'),
             delay_to_check_mob_still_alive_sec=self.config.get('delay_to_check_mob_still_alive_sec'),
-            convert_penya_to_perins_timer_min=self.config.get('convert_penya_to_perins_timer_min'),
+            # convert_penya_to_perins_timer_min=self.config.get('convert_penya_to_perins_timer_min'),
             selected_mobs=selected_mobs_list,
         )
 
@@ -280,19 +280,19 @@ class RemiApp(App):
             w.set_value(str(self.config.get('delay_to_check_mob_still_alive_sec', '')))
         combatSettings_alive_check_delay_input.onchange.do(alive_check_onchange)
 
-        combatSettings_penya_convert_timer_label = gui.Label('Timer to convert penya to perins (m)', width=100, style={'height': 'auto', 'margin-left': '10px', 'margin-top': '10px'})
-        combatSettings_penya_convert_timer_input = gui.TextInput(width=100, height='100%', style={'padding': '5px'})
-        combatSettings_penya_convert_timer_input.set_value(str(self.config.get('convert_penya_to_perins_timer_min', '')))
-        def penya_convert_timer_onchange(w, v):
-            value = v
-            try:
-                value = int(v)
-            except Exception:
-                w.set_value(str(self.config.get('convert_penya_to_perins_timer_min', '')))
-                return
-            self.set_config(convert_penya_to_perins_timer_min=value)
-            w.set_value(str(self.config.get('convert_penya_to_perins_timer_min', '')))
-        combatSettings_penya_convert_timer_input.onchange.do(penya_convert_timer_onchange)
+        # combatSettings_penya_convert_timer_label = gui.Label('Timer to convert penya to perins (m)', width=100, style={'height': 'auto', 'margin-left': '10px', 'margin-top': '10px'})
+        # combatSettings_penya_convert_timer_input = gui.TextInput(width=100, height='100%', style={'padding': '5px'})
+        # combatSettings_penya_convert_timer_input.set_value(str(self.config.get('convert_penya_to_perins_timer_min', '')))
+        # def penya_convert_timer_onchange(w, v):
+        #     value = v
+        #     try:
+        #         value = int(v)
+        #     except Exception:
+        #         w.set_value(str(self.config.get('convert_penya_to_perins_timer_min', '')))
+        #         return
+        #     self.set_config(convert_penya_to_perins_timer_min=value)
+        #     w.set_value(str(self.config.get('convert_penya_to_perins_timer_min', '')))
+        # combatSettings_penya_convert_timer_input.onchange.do(penya_convert_timer_onchange)
 
         combatSettingsContainer.append([
             combatSettings_mobs_kill_goal_label,
@@ -301,8 +301,8 @@ class RemiApp(App):
             combatSettings_fight_time_input,
             combatSettings_alive_check_delay_label,
             combatSettings_alive_check_delay_input,
-            combatSettings_penya_convert_timer_label,
-            combatSettings_penya_convert_timer_input
+            # combatSettings_penya_convert_timer_label,
+            # combatSettings_penya_convert_timer_input
         ])
 
         combatSettingsBlock = gui.Container([

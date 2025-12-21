@@ -37,7 +37,7 @@ class Bot:
             "mobs_kill_goal": None,
             "fight_time_limit_sec": 8,
             "delay_to_check_mob_still_alive_sec": 0.25,
-            "convert_penya_to_perins_timer_min": 30,
+            # "convert_penya_to_perins_timer_min": 30,
             "selected_mobs": [],
         }
         self.gui_window = None
@@ -47,9 +47,9 @@ class Bot:
         self.is_running = False
 
         # Synced Timers
-        self.convert_penya_to_perins_timer = SyncedTimer(
-            self.__convert_penya_to_perins, float(self.config["convert_penya_to_perins_timer_min"]) * 60
-        )
+        # self.convert_penya_to_perins_timer = SyncedTimer(
+        #     self.__convert_penya_to_perins, float(self.config["convert_penya_to_perins_timer_min"]) * 60
+        # )
 
     def setup(self, window_handler, gui_window):
         self.gui_window = gui_window
@@ -107,7 +107,7 @@ class Bot:
         for key, value in options.items():
             self.config[key] = value
 
-        self.__update_timer_configs()
+        # self.__update_timer_configs()
 
     def get_all_mobs(self):
         return MobInfo.get_all_mobs()
