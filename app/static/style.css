@@ -46,3 +46,10 @@ body {
   padding: 10px;
   justify-content: space-between;
 }
+
+.remi-main p.DialogTitle {
+  font-family: 'Geologica' !important;
+  padding: 5px !important;
+  font-size: 20px !important;
+  font-weight: 300;
+}

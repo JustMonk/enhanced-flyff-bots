@@ -14,13 +14,11 @@
 
 import json
 import os
+import time
 from pathlib import Path
 import threading
-import time
 import remi.gui as gui
-from remi import start, App
-from threading import Timer
-import webview
+from remi import App
 from utils.helpers import get_window_handlers
 import numpy
 import cv2 as cv
@@ -126,11 +124,11 @@ class RemiApp(App):
         pass
     
     def on_stop_hotkey(self):
-        print("Stop hotkey triggered, bot is going to stop...")
+        self.append_status_log("Stop hotkey triggered, bot is going to stop...")
         self.stop_bot()
 
     def main(self, bot):
-        self.page.children['head'].add_child('additional_headdata', '<link rel="stylesheet" href="/static:style.css">')
+        self.page.children['head'].add_child('additional_headdata', f'<link rel="stylesheet" href="/static:style.css&t={int(time.time())}">')
 
         self.bot = bot
         self.load_config()
@@ -199,42 +197,11 @@ class RemiApp(App):
         # </------------------ [MOBS BLOCK] ------------------>
 
         # <------------------ [OPTIONS BLOCK] ------------------>
-        checkOptionsContainer = gui.Container(style={'display': 'flex'})
-        self.options_container_show_bot_vision_checkbox = gui.CheckBoxLabel('Show bot\'s vision', False, width=200, height=30, margin='10px', style={'justify-content': 'flex-start'})
-
-        # def bot_vision_on_change
-        # self.options_container_show_bot_vision_checkbox.onchange()
-        
-        self.options_container_vision_params = gui.Container(style={'display': 'none'})
-
-        self.options_container_show_matches_text_checkbox = gui.CheckBoxLabel('Show matches text', self.config.get('show_matches_text'), height=30, margin='10px', style={'justify-content': 'flex-start'})
-        self.options_container_show_matches_text_checkbox.onchange.do(lambda w, v: self.set_config(show_matches_text=v))
-
-        self.options_container_show_mobs_boxes_checkbox = gui.CheckBoxLabel('Show mobs boxes', self.config.get('show_mobs_boxes'), width=200, height=30, margin='10px', style={'justify-content': 'flex-start'})
-        self.options_container_show_mobs_boxes_checkbox.onchange.do(lambda w, v: self.set_config(show_mobs_boxes=v))
-
-        self.options_container_show_mobs_markers_checkbox = gui.CheckBoxLabel('Show mobs markers', self.config.get('show_mobs_markers'), width=200, height=30, margin='10px', style={'justify-content': 'flex-start'})
-        self.options_container_show_mobs_markers_checkbox.onchange.do(lambda w, v: self.set_config(show_mobs_markers=v))
-        
-        def show_bot_vision_onchange(w, v):
-            self.show_bot_vision = v
-            if v:
-                self.options_container_vision_params.css_display = 'block'
-            else:
-                self.options_container_vision_params.css_display = 'none'
-            self.bot.set_config(show_frames=v)
-        self.options_container_show_bot_vision_checkbox.onchange.do(show_bot_vision_onchange)
-
-        
-        self.options_container_vision_params.append([
-            self.options_container_show_matches_text_checkbox,
-            self.options_container_show_mobs_boxes_checkbox,
-            self.options_container_show_mobs_markers_checkbox
-        ])
-        
-        checkOptionsContainer.append([
-            self.options_container_show_bot_vision_checkbox,
-            self.options_container_vision_params
+        visionOptionsContainer = gui.Container(style={'display': 'flex'})
+        self.show_bots_vision_bt = gui.Button("Show bot's vision", margin='10px', _class='Button main-button')
+        self.show_bots_vision_bt.onclick.do(self.open_show_bots_vision_dialog)
+        visionOptionsContainer.append([
+            self.show_bots_vision_bt,
         ])
         
         thresholdContainer = gui.Container([
@@ -337,13 +304,16 @@ class RemiApp(App):
             combatSettings_penya_convert_timer_input
         ])
 
-        # mainWrapperContainer.append([optionsContainer])
+        combatSettingsBlock = gui.Container([
+            gui.Label('Fight options', width=200, margin='10px', style={'font-weight': 'bold'}),
+            combatSettingsContainer
+        ])
 
         optionsCard = SectionCard([
             gui.Container([
-                checkOptionsContainer,
+                visionOptionsContainer,
                 thresholdContainer,
-                combatSettingsContainer
+                combatSettingsBlock
             ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'block'})
         ], header='Options')
         mainWrapperContainer.append([optionsCard])
@@ -353,28 +323,15 @@ class RemiApp(App):
         self.txt = gui.TextInput(single_line=False, height=150, margin='10px', style={'width': '90%', 'padding': '5px'})
         self.txt.set_text('UI started')
         self.txt.attributes['readonly'] = '1'
-        
-        fps_container = gui.Container(margin='0px auto', style={'display': 'flex'})
-        fps_label = gui.Label('Fps:', height=30, margin='10px')
-        self.fps_counter = gui.Label('-', width=200, height=30, margin='10px')
-        fps_container.append([
-            fps_label,
-            self.fps_counter
-        ])
-
-        self.img = gui.Image('', margin='10px', style={'border': '2px dotted grey', 'max-width': '95%'})
 
         statusCard = SectionCard([
             gui.Container([
-                self.txt,
-                fps_container,
-                self.img
+                self.txt
             ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'block'})
         ], header='Status')
         mainWrapperContainer.append([statusCard])
         # </------------------ [STATUS BLOCK] ------------------>
 
-        
         return mainWrapperContainer
     
     def exit(self, widget):
@@ -423,7 +380,7 @@ class RemiApp(App):
         dialog.hide()
 
     def open_select_mobs_dialog(self, widget, is_delete_form=False):
-        dialog = gui.GenericDialog(title='Select mobs' if not is_delete_form else 'Delete mobs', width='400px', height='400px')
+        dialog = gui.GenericDialog(title='Select mobs' if not is_delete_form else 'Delete mobs', width='400px')
 
         mobNameInput = gui.TextInput(width=200, height=30)
         dialog.add_field_with_label('mobNameInput', 'Find', mobNameInput)
@@ -463,12 +420,11 @@ class RemiApp(App):
         dialog.confirm_dialog.do(submit)
         dialog.show(self)
 
-    
     def open_delete_mob_dialog(self, widget):
         self.open_select_mobs_dialog(widget, is_delete_form=True)
 
     def open_add_mob_dialog(self, widget):
-        dialog = gui.GenericDialog(title='Add mob', width='350px', height='450px')
+        dialog = gui.GenericDialog(title='Add mob', width='350px')
 
         mobNameInput = gui.TextInput(width=200, height=30)
         dialog.add_field_with_label('mobNameInput', 'Mob name', mobNameInput)
@@ -521,9 +477,46 @@ class RemiApp(App):
 
         dialog.hide()
 
-    def loop(self):
-        # start(self, debug=True, standalone=True)
-        start(self, debug=True, address='0.0.0.0', port=8081, start_browser=True, multiple_instance=True)
+    def open_show_bots_vision_dialog(self, widget):
+        dialog = gui.GenericDialog(title="Bot's vision", width='auto', height='auto')
+        dialog.set_style({'margin': '20px'})
+
+        fps_container = gui.Container(style={'display': 'flex'})
+        fps_label = gui.Label('FPS:', margin='10px')
+        self.fps_counter = gui.Label('-', width=200, margin='10px')
+        fps_container.append([
+            fps_label,
+            self.fps_counter
+        ])
+        dialog.add_field('fps', fps_container)
+
+        options_container_vision_params = gui.Container(style={'display': 'flex'})
+
+        options_container_show_matches_text_checkbox = gui.CheckBoxLabel('Show matches text', self.config.get('show_matches_text'), height=30, margin='10px', style={'justify-content': 'flex-start'})
+        options_container_show_matches_text_checkbox.onchange.do(lambda w, v: self.set_config(show_matches_text=v))
+
+        options_container_show_mobs_boxes_checkbox = gui.CheckBoxLabel('Show mobs boxes', self.config.get('show_mobs_boxes'), height=30, margin='10px', style={'justify-content': 'flex-start'})
+        options_container_show_mobs_boxes_checkbox.onchange.do(lambda w, v: self.set_config(show_mobs_boxes=v))
+
+        options_container_show_mobs_markers_checkbox = gui.CheckBoxLabel('Show mobs markers', self.config.get('show_mobs_markers'), height=30, margin='10px', style={'justify-content': 'flex-start'})
+        options_container_show_mobs_markers_checkbox.onchange.do(lambda w, v: self.set_config(show_mobs_markers=v))
+        
+        options_container_vision_params.append([
+            options_container_show_matches_text_checkbox,
+            options_container_show_mobs_boxes_checkbox,
+            options_container_show_mobs_markers_checkbox
+        ])
+
+        dialog.add_field('vision_controls', options_container_vision_params)
+
+        self.img = gui.Image('', style={'border': '2px dotted grey', 'width': '100%'})
+        dialog.add_field('img', self.img)
+
+        self.bot.set_config(show_frames=True)
+        dialog.confirm_dialog.do(lambda w: self.bot.set_config(show_frames=False))
+        dialog.cancel_dialog.do(lambda w: self.bot.set_config(show_frames=False))
+
+        dialog.show(self)
 
     def render_image(self, source_img: numpy.ndarray):
         try:
@@ -564,10 +557,3 @@ class RemiApp(App):
             self.start_bot()
         else:
             self.stop_bot()
-
-if __name__ == "__main__":
-    # starts the webserver
-    # optional parameters
-    # start(MyApp,address='127.0.0.1', port=8081, multiple_instance=False,enable_file_cache=True, update_interval=0.1, start_browser=True)
-    # start(MyApp, debug=True, address='0.0.0.0', port=8081, start_browser=True, multiple_instance=True)
-    start(RemiApp, debug=True, standalone=True)
