@@ -34,7 +34,7 @@ from key_sender import send_to_window
 from pynput.keyboard import Key
 import shutil
 
-class MyApp(App):
+class RemiApp(App):
     def __new__(cls, *args, **kwargs):
         instance = super().__new__(cls)
         instance.config_file = Path("app_config.json")
@@ -64,7 +64,7 @@ class MyApp(App):
     def __init__(self, *args, **kwargs):
         res_path = os.path.join(os.path.dirname(__file__), 'static')
         self.show_bot_vision = False
-        super(MyApp, self).__init__(*args, static_file_path={'static': res_path})
+        super(RemiApp, self).__init__(*args, static_file_path={'static': res_path})
 
     def load_config(self):
         """Load configuration from file"""
@@ -384,7 +384,7 @@ class MyApp(App):
         """ Overloading App.on_close event to stop the Timer.
         """
         self.stop_flag = True
-        super(MyApp, self).on_close()
+        super(RemiApp, self).on_close()
 
     def open_attach_window_popup(self, widget):
         # Create a dialog window
@@ -570,4 +570,4 @@ if __name__ == "__main__":
     # optional parameters
     # start(MyApp,address='127.0.0.1', port=8081, multiple_instance=False,enable_file_cache=True, update_interval=0.1, start_browser=True)
     # start(MyApp, debug=True, address='0.0.0.0', port=8081, start_browser=True, multiple_instance=True)
-    start(MyApp, debug=True, standalone=True)
+    start(RemiApp, debug=True, standalone=True)
