@@ -15,6 +15,7 @@
 import json
 import os
 import time
+from datetime import datetime
 from pathlib import Path
 import threading
 import remi.gui as gui
@@ -321,14 +322,14 @@ class RemiApp(App):
         # </------------------ [OPTIONS BLOCK] ------------------>
 
         # <------------------ [STATUS BLOCK] ------------------>
-        self.txt = gui.TextInput(single_line=False, height=150, margin='10px', style={'width': '90%', 'padding': '5px'})
-        self.txt.set_text('UI started')
+        self.txt = gui.TextInput(single_line=False, height=150, margin='10px', style={'width': 'auto', 'padding': '5px', 'flex-grow': '1'})
         self.txt.attributes['readonly'] = '1'
+        self.append_status_log('UI started')
 
         statusCard = SectionCard([
             gui.Container([
                 self.txt
-            ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'block'})
+            ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'flex'})
         ], header='Status')
         mainWrapperContainer.append([statusCard])
         # </------------------ [STATUS BLOCK] ------------------>
@@ -511,6 +512,7 @@ class RemiApp(App):
         dialog.add_field('vision_controls', options_container_vision_params)
 
         self.img = gui.Image('', style={'border': '2px dotted grey', 'width': '100%'})
+        self.img.attributes['alt'] = 'unable to getting an image'
         dialog.add_field('img', self.img)
 
         self.bot.set_config(show_frames=True)
@@ -538,8 +540,11 @@ class RemiApp(App):
         self.fps_counter.set_text(str(value))
 
     def append_status_log(self, msg):
+        now = datetime.now()
+        dt = now.strftime("%Y-%m-%d %H:%M:%S")
+
         current_value = self.txt.get_value()
-        current_value += f'\n{msg}'
+        current_value += f'\n [{dt}] {msg}'
         self.txt.set_value(current_value)
 
     def start_bot(self):
