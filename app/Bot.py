@@ -1,6 +1,8 @@
 import collections
+from datetime import datetime
 from threading import Thread
 from time import sleep, time
+import re
 
 import pyttsx3
 from assets.Assets import GeneralAssets, MobInfo, MobType
@@ -16,6 +18,7 @@ from pynput.keyboard import Key, Controller
 
 import cv2 as cv
 from pathlib import Path
+
 
 @throttle()
 def emit_msg(gui_window, color, msg):
@@ -39,6 +42,8 @@ class Bot:
             "delay_to_check_mob_still_alive_sec": 0.25,
             # "convert_penya_to_perins_timer_min": 30,
             "selected_mobs": [],
+            "enable_autohotkeys": False,
+            "autohotkeys_interval": {},
         }
         self.gui_window = None
         self.frame = None
@@ -66,6 +71,7 @@ class Bot:
         self.__farm_thread_running = True
         Thread(target=self.__farm_thread, daemon=True).start()
         Thread(target=self.__attack_target_thread, daemon=True).start()
+        Thread(target=self.__hotkey_thread, daemon=True).start()
 
     def stop(self):
         self.is_running = False
@@ -154,10 +160,10 @@ class Bot:
                 # self.gui_window.write_event_value("debug_frame", self.debug_frame)
                 self.gui_window.render_image(self.debug_frame)
 
-            fps_circular_buffer.append(time() - loop_time)
-            fps = round(1 / (sum(fps_circular_buffer) / len(fps_circular_buffer)))
-            # self.gui_window.write_event_value("video_fps", f"Video FPS: {fps}")
-            self.gui_window.set_fps_value(fps)
+                fps_circular_buffer.append(time() - loop_time)
+                fps = round(1 / (sum(fps_circular_buffer) / len(fps_circular_buffer)))
+                # self.gui_window.write_event_value("video_fps", f"Video FPS: {fps}")
+                self.gui_window.set_fps_value(fps)
             loop_time = time()
 
     def __farm_thread(self):
@@ -167,7 +173,11 @@ class Bot:
         # TODO: set window active
 
         while True:
+            if not self.__farm_thread_running:
+                break
+
             if not len(self.config["selected_mobs"]) > 0:
+                sleep(3)
                 continue
 
             # self.convert_penya_to_perins_timer()
@@ -189,6 +199,7 @@ class Bot:
                     # print("Current mob no found, checking another one.")
 
             if (self.config["mobs_kill_goal"] is not None) and (mobs_killed >= int(self.config["mobs_kill_goal"])):
+                # TODO: просто завершит farm_thread без остановки остальных
                 break
 
             emit_msg(
@@ -200,8 +211,24 @@ class Bot:
                 else f"Mobs killed: {mobs_killed}",
             )
 
+    def __hotkey_thread(self):
+        if not self.config.get('enable_autohotkeys'):
+            return
+
+        _key_pattern = re.compile(r"^F([2-9]|10)$")
+        hotkeys_last_pressed_date = {
+            key: None for key in self.config.get('autohotkeys_interval', {}).keys()
+            if _key_pattern.match(key)
+        }
+
+        while True:
             if not self.__farm_thread_running:
                 break
+            for key in hotkeys_last_pressed_date:
+                if hotkeys_last_pressed_date[key] is None or (datetime.now() - hotkeys_last_pressed_date[key]).total_seconds() * 1000 >= self.config.get('autohotkeys_interval', {}).get(key):
+                    hotkeys_last_pressed_date[key] = datetime.now()
+                    send_to_window(self.keyboard.hwnd, getattr(Key, key.lower()))
+            sleep(0.1)
 
     def __mobs_available_on_screen(self, current_mob, points, mobs_killed):
         if self.__check_mob_still_alive(current_mob):

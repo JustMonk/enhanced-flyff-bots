@@ -55,7 +55,9 @@ class RemiApp(App):
             "mobs_kill_goal": None,
             "fight_time_limit_sec": 8,
             "delay_to_check_mob_still_alive_sec": 0.25,
-            # "convert_penya_to_perins_timer_min": 30,
+            # autohotkeys options
+            'enable_autohotkeys': False,
+            'autohotkeys_interval': {},
             "selected_mobs": [],
         }
         return instance
@@ -81,6 +83,7 @@ class RemiApp(App):
 
     def update_bot_config(self, bot):
         # TODO: тут бы еще регенерацию конфига, если типы не совпадают с ожидаемым (или функцию валидации)
+        # TODO: pydantic
         all_mobs = bot.get_all_mobs()
         selected_mobs_names = self.config['selected_mobs']
         selected_mobs_names = [name for name in selected_mobs_names if name in all_mobs] # exist filter
@@ -101,8 +104,10 @@ class RemiApp(App):
             mobs_kill_goal=self.config.get('mobs_kill_goal'),
             fight_time_limit_sec=self.config.get('fight_time_limit_sec'),
             delay_to_check_mob_still_alive_sec=self.config.get('delay_to_check_mob_still_alive_sec'),
-            # convert_penya_to_perins_timer_min=self.config.get('convert_penya_to_perins_timer_min'),
             selected_mobs=selected_mobs_list,
+            # hotkeys
+            enable_autohotkeys=self.config.get('enable_autohotkeys'),
+            autohotkeys_interval=self.config.get('autohotkeys_interval'),
         )
 
     def save_config(self):
@@ -170,12 +175,8 @@ class RemiApp(App):
             gui.Container([
                 self.actionsContainer_attach_bt,
                 self.start_stop_bt
-                # self.actionsContainer_start_bt,
-                # self.actionsContainer_stop_bt,
-                # self.actionsContainer_exit_bt
             ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'flex', 'justify-content': 'space-around'}),
             self.actionsContainer_current_attached_label,
-            # self.send_keys_bt
         ], header='Actions')
         mainWrapperContainer.append([actionsCard])
         # </------------------ [ACTIONS BLOCK] ------------------>
@@ -188,12 +189,26 @@ class RemiApp(App):
         self.mobsContainer_delete_mobs_bt = gui.Button('Delete mobs', margin='10px', _class='Button main-button')
         self.mobsContainer_delete_mobs_bt.onclick.do(self.open_delete_mob_dialog)
 
+        self.mobsContainer_add_type_bt = gui.Button('Add type', margin='10px', _class='Button main-button')
+        self.mobsContainer_add_type_bt.onclick.do(self.open_add_mob_type_dialog)
+
+        self.mobsContainer_delete_type_bt = gui.Button('Delete types', margin='10px', _class='Button main-button')
+        self.mobsContainer_delete_type_bt.onclick.do(self.open_delete_mob_type_dialog)
+
         mobsCard = SectionCard([
             gui.Container([
-                self.mobsContainer_select_mobs_bt,
-                self.mobsContainer_add_mob_bt,
-                self.mobsContainer_delete_mobs_bt
-            ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'flex'})
+                gui.Container([
+                    gui.Label('Mob management', width=200, margin='10px', style={'font-weight': 'bold'}),
+                    self.mobsContainer_select_mobs_bt,
+                    self.mobsContainer_add_mob_bt,
+                    self.mobsContainer_delete_mobs_bt
+                ], style={'border-top': '1px solid #d7d7d7', 'margin-top': '10px', 'padding-top': '10px'}),
+                gui.Container([
+                    gui.Label('Mob type management', width=200, margin='10px', style={'font-weight': 'bold'}),
+                    self.mobsContainer_add_type_bt,
+                    self.mobsContainer_delete_type_bt
+                ], style={'border-top': '1px solid #d7d7d7', 'margin-top': '10px', 'padding-top': '10px'})
+            ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'flex', 'flex-direction': 'column'})
         ], header='Mobs')
         mainWrapperContainer.append([mobsCard])
         # </------------------ [MOBS BLOCK] ------------------>
@@ -214,7 +229,7 @@ class RemiApp(App):
                     value=self.config['mob_position_match_threshold'],
                     on_change=lambda w, v: self.set_config(mob_position_match_threshold=float(v))
                 ),
-                 LabeledSlider(
+                LabeledSlider(
                     label="Mob still alive match threshold",
                     value=self.config['mob_still_alive_match_threshold'],
                     on_change=lambda w, v: self.set_config(mob_still_alive_match_threshold=float(v))
@@ -281,20 +296,6 @@ class RemiApp(App):
             w.set_value(str(self.config.get('delay_to_check_mob_still_alive_sec', '')))
         combatSettings_alive_check_delay_input.onchange.do(alive_check_onchange)
 
-        # combatSettings_penya_convert_timer_label = gui.Label('Timer to convert penya to perins (m)', width=100, style={'height': 'auto', 'margin-left': '10px', 'margin-top': '10px'})
-        # combatSettings_penya_convert_timer_input = gui.TextInput(width=100, height='100%', style={'padding': '5px'})
-        # combatSettings_penya_convert_timer_input.set_value(str(self.config.get('convert_penya_to_perins_timer_min', '')))
-        # def penya_convert_timer_onchange(w, v):
-        #     value = v
-        #     try:
-        #         value = int(v)
-        #     except Exception:
-        #         w.set_value(str(self.config.get('convert_penya_to_perins_timer_min', '')))
-        #         return
-        #     self.set_config(convert_penya_to_perins_timer_min=value)
-        #     w.set_value(str(self.config.get('convert_penya_to_perins_timer_min', '')))
-        # combatSettings_penya_convert_timer_input.onchange.do(penya_convert_timer_onchange)
-
         combatSettingsContainer.append([
             combatSettings_mobs_kill_goal_label,
             combatSettings_mobs_kill_goal_input,
@@ -302,8 +303,6 @@ class RemiApp(App):
             combatSettings_fight_time_input,
             combatSettings_alive_check_delay_label,
             combatSettings_alive_check_delay_input,
-            # combatSettings_penya_convert_timer_label,
-            # combatSettings_penya_convert_timer_input
         ])
 
         combatSettingsBlock = gui.Container([
@@ -320,6 +319,58 @@ class RemiApp(App):
         ], header='Options')
         mainWrapperContainer.append([optionsCard])
         # </------------------ [OPTIONS BLOCK] ------------------>
+
+        # <------------------ [AUTOHOTKEYS BLOCK] ------------------>
+        enable_autohotkeys_checkbox = gui.CheckBoxLabel('Enable autohotkeys', self.config.get('enable_autohotkeys'), height=30, margin='10px', style={'justify-content': 'flex-start'})
+        enable_autohotkeys_checkbox.onchange.do(lambda w, v: self.set_config(enable_autohotkeys=v))
+
+        f_inputs = [gui.TextInput(width=60, height='100%', style={'padding': '5px'}) for i in range(0,9)]
+        
+        def create_hotkey_iterval_callback(key: str):
+            def hotkey_interval_onchange(w, v):
+                value = v
+                try:
+                    value = int(v)
+                except Exception:
+                    value = ''
+
+                current_hotkeys_interval = self.config.get('autohotkeys_interval', {})
+
+                if not value:
+                    w.set_value('')
+                    if current_hotkeys_interval.get(key):
+                        del current_hotkeys_interval[key]
+                else:
+                    current_hotkeys_interval[key] = value
+                    w.set_value(str(self.config.get('autohotkeys_interval', {}).get(key)))
+
+                self.set_config(autohotkeys_interval=current_hotkeys_interval)
+            return hotkey_interval_onchange
+
+        for index, input in enumerate(f_inputs):
+            input.set_value(str(self.config.get('autohotkeys_interval', {}).get(f'F{index+2}', '')))
+            input.onchange.do(create_hotkey_iterval_callback(f'F{index+2}'))
+
+        hotkeys_container = gui.Container([
+            gui.Container([
+                gui.Label('F1', width=30, style={'height': 'auto'}),
+                gui.Label('<reserved for attack>', style={'height': 'auto'}),
+            ], style={'display': 'flex', 'align-items': 'center', 'padding': '5px 10px'}),
+            [gui.Container([
+                gui.Label(f'F{i+2}', width=30, style={'height': 'auto'}),
+                input,
+                gui.Label('ms', style={'height': 'auto'}),
+            ], style={'display': 'flex', 'align-items': 'center', 'padding': '5px 10px'}) for i, input in enumerate(f_inputs)]
+        ])
+
+        autohotkeysCard = SectionCard([
+            gui.Container([
+                enable_autohotkeys_checkbox,
+                hotkeys_container
+            ], margin='0px auto', style={'overflow': 'hidden', 'width': '100%', 'display': 'block'})
+        ], header='Autohotkeys')
+        mainWrapperContainer.append([autohotkeysCard])
+        # </------------------ [AUTOHOTKEYS BLOCK] ------------------>
 
         # <------------------ [STATUS BLOCK] ------------------>
         self.txt = gui.TextInput(single_line=False, height=150, margin='10px', style={'width': 'auto', 'padding': '5px', 'flex-grow': '1'})
@@ -443,7 +494,7 @@ class RemiApp(App):
         def save_raw_file(widget, filename):
             widget.filename = filename
         fileInput.onsuccess.do(save_raw_file)
-        dialog.add_field_with_label('fileInput', 'file', fileInput)
+        dialog.add_field_with_label('fileInput', 'Image file', fileInput)
 
         heightOffsetInput = gui.TextInput(width=200, height=30)
         dialog.add_field_with_label('heightOffsetInput', 'Height offset', heightOffsetInput)
@@ -563,3 +614,27 @@ class RemiApp(App):
             self.start_bot()
         else:
             self.stop_bot()
+
+    def open_add_mob_type_dialog(self, widget):
+        dialog = gui.GenericDialog(title="Add mob type", width='450px', height='auto')
+
+        typeNameInput = gui.TextInput(width=200, height=30)
+        dialog.add_field_with_label('typeNameInput', 'Type name', typeNameInput)
+
+        BASE_DIR = Path(__file__).parent
+        folder_path = BASE_DIR / "assets" / "_temp"
+        folder_path.mkdir(parents=True, exist_ok=True)
+
+        fileInput = gui.FileUploader(folder_path, width=200, height=30, margin='10px')
+        fileInput.filename = None
+        def save_raw_file(widget, filename):
+            widget.filename = filename
+        fileInput.onsuccess.do(save_raw_file)
+        dialog.add_field_with_label('fileInput', 'Image file', fileInput)
+
+        dialog.show(self)
+
+    def open_delete_mob_type_dialog(self, widget):
+        dialog = gui.GenericDialog(title="Delete mob type", width='450px', height='auto')
+        dialog.show(self)
+    

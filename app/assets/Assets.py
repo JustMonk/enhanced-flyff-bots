@@ -28,6 +28,11 @@ class MobType:
     ELECTRICITY = cv.imread(mob_type_electricity_path, cv.IMREAD_GRAYSCALE)
     LVL = cv.imread(mobb_type_lvl_path, cv.IMREAD_GRAYSCALE)
 
+folder = Path(__file__).parent / "mob_types"
+for file in folder.iterdir():
+    if file.is_file():
+        print(file.name)
+
 
 class MobInfo:
     @staticmethod
