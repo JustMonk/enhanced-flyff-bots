@@ -466,7 +466,6 @@ class RemiApp(App):
                 self.set_config(selected_mobs=selected_names)
             else:
                 from assets.Assets import MobInfo
-                MobInfo.delete_mobs
                 self.set_config(selected_mobs=[name for name in self.config['selected_mobs'] if name not in selected_names])
                 MobInfo.delete_mobs(selected_names)
 
@@ -499,7 +498,8 @@ class RemiApp(App):
         heightOffsetInput = gui.TextInput(width=200, height=30)
         dialog.add_field_with_label('heightOffsetInput', 'Height offset', heightOffsetInput)
 
-        elementDropdownInput = gui.DropDown.new_from_list(['electricity', 'wind', 'fire', 'water', 'soil', 'lvl'], width=200, height=20, margin='10px')
+        from assets.Assets import MobType
+        elementDropdownInput = gui.DropDown.new_from_list(MobType.get_type_list(), width=200, height=20, margin='10px')
         dialog.add_field_with_label('elementDropdownInput', 'Element', elementDropdownInput)
 
         dialog.confirm_dialog.do(self.on_add_mob_dialog_confirm)
@@ -632,9 +632,37 @@ class RemiApp(App):
         fileInput.onsuccess.do(save_raw_file)
         dialog.add_field_with_label('fileInput', 'Image file', fileInput)
 
+        dialog.confirm_dialog.do(self.on_add_mob_type_dialog_confirm)
         dialog.show(self)
+
+    def on_add_mob_type_dialog_confirm(self, dialog):
+        from assets.Assets import MobType
+        BASE_DIR = Path(__file__).parent
+        img_temp_folder_path = BASE_DIR / "assets" / "_temp"
+
+        MobType.add_new_type(
+            dialog.get_field('typeNameInput').get_value(),
+            img_temp_folder_path / dialog.get_field('fileInput').filename
+        )
 
     def open_delete_mob_type_dialog(self, widget):
         dialog = gui.GenericDialog(title="Delete mob type", width='450px', height='auto')
+
+        filterInput = gui.TextInput(width=200, height=30)
+        dialog.add_field_with_label('filterInput', 'Find', filterInput)
+
+        from assets.Assets import MobType
+        listMultiView = ListMultiselectView.new_from_list(MobType.get_type_list(), height=250, margin='10px', style={'width': '100%', 'padding': '0'})
+
+        def filterInput_onchange(w, val, keycode):
+            listMultiView.set_filter(val)
+        filterInput.onkeyup.do(filterInput_onchange)
+
+        dialog.add_field('typeListMulti', listMultiView)
+
+        def submit(dialog):
+            for mob_type in listMultiView.get_value():
+                MobType.delete_mob_type(mob_type)
+
+        dialog.confirm_dialog.do(submit)
         dialog.show(self)
-    

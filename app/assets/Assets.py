@@ -4,7 +4,6 @@ import cv2 as cv
 import json
 import os
 import shutil
-from enum import Enum
 
 mob_type_wind_path = str(Path(__file__).parent / "mob_types" / "wind.png")
 mob_type_fire_path = str(Path(__file__).parent / "mob_types" / "fire.png")
@@ -21,17 +20,31 @@ target_mark_path = str(Path(__file__).parent / "general" / "target_mark.png")
 
 
 class MobType:
-    WIND = cv.imread(mob_type_wind_path, cv.IMREAD_GRAYSCALE)
-    FIRE = cv.imread(mob_type_fire_path, cv.IMREAD_GRAYSCALE)
-    SOIL = cv.imread(mob_type_soil_path, cv.IMREAD_GRAYSCALE)
-    WATER = cv.imread(mob_type_water_path, cv.IMREAD_GRAYSCALE)
-    ELECTRICITY = cv.imread(mob_type_electricity_path, cv.IMREAD_GRAYSCALE)
-    LVL = cv.imread(mobb_type_lvl_path, cv.IMREAD_GRAYSCALE)
+    @staticmethod
+    def get_type_list():
+        return [name for name in vars(MobType) if not (name.startswith('__') and name.endswith('__')) and not callable(getattr(MobType, name))]
+    
+    @staticmethod
+    def add_new_type(name: str, image_path: str):
+        shutil.copyfile(image_path, str(Path(__file__).parent / "mob_types" / f"{name}.png"))
+        MobType.load_types()
 
-folder = Path(__file__).parent / "mob_types"
-for file in folder.iterdir():
-    if file.is_file():
-        print(file.name)
+    @staticmethod
+    def delete_mob_type(mob_type: str):
+        MobInfo.delete_mobs_by_type(mob_type)
+        os.remove(str(Path(__file__).parent / "mob_types" / f"{mob_type}.png"))
+        delattr(MobType, mob_type)
+
+    @staticmethod
+    def load_types():
+        folder = Path(__file__).parent / "mob_types"
+        for file in folder.iterdir():
+            if file.is_file():
+                current_type_path = str(Path(__file__).parent / "mob_types" / file.name)
+                setattr(MobType, file.name.split('.')[0], cv.imread(current_type_path, cv.IMREAD_GRAYSCALE))
+
+
+MobType.load_types()
 
 
 class MobInfo:
@@ -74,6 +87,11 @@ class MobInfo:
 
         file = open(json_collection_path, 'w+')
         json.dump(new_mobs_list, file)
+
+    @staticmethod
+    def delete_mobs_by_type(mob_type: str) -> dict[str, dict]:
+        mob_list_to_delete = [name for name, value in MobInfo.get_all_mobs().items() if value.get('element') == mob_type]
+        MobInfo.delete_mobs(mob_list_to_delete)
 
     @staticmethod
     def get_all_mobs() -> dict[str, dict]:
