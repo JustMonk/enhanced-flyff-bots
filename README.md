@@ -20,7 +20,7 @@ Its detached fork of [xandao's flyff-bots](https://github.com/xandao-dev/flyff-b
 
 ## Executable version
 
-Just download latest version from releases and run .exe
+Just download latest version from [releases](https://github.com/JustMonk/enhanced-flyff-bots/releases) and run .exe
 
 > Because of using win32 api and hotkey listening some antiviruses (like windows defender) may put the file to quarantine. If you want to use executable version, make sure you add file in exceptions
 
