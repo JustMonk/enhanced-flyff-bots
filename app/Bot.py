@@ -369,7 +369,7 @@ class Bot:
         _, _, _, passed_threshold, drawn_frame = CV.match_template(
             frame=self.frame,
             crop_area=(0, 50, 200, -200),
-            template=getattr(MobType, current_mob["element"].upper()),
+            template=getattr(MobType, current_mob["element"]),
             threshold=float(self.config["mob_still_alive_match_threshold"]),
             frame_to_draw=self.debug_frame if debug else None,
             text_to_draw="Mob still alive" if debug and self.config["show_matches_text"] else None,
