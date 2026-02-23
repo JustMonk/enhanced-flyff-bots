@@ -5,13 +5,6 @@ import json
 import os
 import shutil
 
-mob_type_wind_path = str(Path(__file__).parent / "mob_types" / "wind.png")
-mob_type_fire_path = str(Path(__file__).parent / "mob_types" / "fire.png")
-mob_type_soil_path = str(Path(__file__).parent / "mob_types" / "soil.png")
-mob_type_water_path = str(Path(__file__).parent / "mob_types" / "water.png")
-mob_type_electricity_path = str(Path(__file__).parent / "mob_types" / "electricity.png")
-mobb_type_lvl_path = str(Path(__file__).parent / "mob_types" / "lvl.png")
-
 mob_life_bar_path = str(Path(__file__).parent / "general" / "mob_life_bar.png")
 user_target_bar_path = str(Path(__file__).parent / "general" / "user_target_bar.png")
 inventory_perin_converter_path = str(Path(__file__).parent / "general" / "inventory_perin_converter.png")
