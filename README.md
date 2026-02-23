@@ -1,175 +1,99 @@
-<br />
 <p align="center">
-  <h3 align="center">Flyff Bots</h3>
-
-  <p align="center">
-	Flyff is a MMORPG game that I used to play when I was a kid. I always wanted to create a bot for it and here I am.
-	This project is a set of bots that I created for Flyff. It has bot for farming and for upgrading your items.
-	<br />
-	:warning: Windows only :warning:
-    <br />
-	<br />
-    <a href="https://github.com/xandao-dev/flyff-bots"><strong>Explore the docs »</strong></a>
-    <br />
-    <a href="https://github.com/xandao-dev/flyff-bots/issue">Report Bug</a>
-    ·
-    <a href="https://github.com/xandao-dev/flyff-bots/issues">Request Feature</a>
-  </p>
+  <img src="docs/logo.png" alt="Logo" />
 </p>
 
+# About
 
-<details open="open">
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#features">Features</a></li>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ol>
-</details>
+Its detached fork of [xandao's flyff-bots](https://github.com/xandao-dev/flyff-bots) with some additional features, performance tweaks and user-friendly UI
 
+<p align="center">
+  <img src="docs/app_preview.png" alt="Preview" />
+</p>
 
-## About The Project
+# Key changes
 
-<div align="center">
-<b>Foreground Vision Bot</b>
-<p>See the Foreground Vision Bot guide <a href="./foreground_vision_bot/docs/README.md">here</a></p>
+- outdated pysimplegui replaced with modern RemiUI
+- win32 executable, no longer need to manually install packages and run from source
+- autohotkey configuration
 
+# How to run
 
-<img src="foreground_vision_bot/docs/bot.png" alt="Flyff bot">
+## Executable version
 
-<b>Awakening Bot</b>
+Just download latest version from releases and run .exe
 
+> Because of using win32 api and hotkey listening some antiviruses (like windows defender) may put the file to quarantine. If you want to use executable version, make sure you add file in exceptions
 
-https://user-images.githubusercontent.com/22106326/200222627-30049ad2-ebf1-4d7f-a1b5-7795e2967215.mp4
+## From sources
 
+1. Make sure you have installed python 3.10 (or install it)
+2. `python -m venv venv`
+3. `cd venv/Scripts`
+4. `activate.bat`
+5. `cd ../..`
+6. `pip install -r requirements.txt`
+7. `python ./app/standalone_app.py` or `python ./app/browser_app.py` (to run UI as browser page)
 
-https://user-images.githubusercontent.com/22106326/150702322-967cf2d8-d789-45e6-af61-503c96dc2ea9.mp4
-</div>
+# Limitations
 
-### Features
+Right now, this only works with a game with a classic (white) interface. If your game has a newer (golden) UI, you need to manually replace the assets.
 
-**Foreground Vision Bot**
+P.S: Auto-detection will be added later
 
-* :star: Works very good :star:
-* Track the monsters by it's names using computer vision (OpenCV)
-* Automatically attack the monsters and move to the next one
-* If no monsters are found, it will automatically run to find more monsters
-* Human-like mouse movement
-* GUI available, to watch the bot and configure it
+# Getting started
 
-**Awakening Bot**
+## add new mob
 
-* :star: Works very good :star:
-* Automatically awaken your items until you get the required stats
-* Works on background or foreground
-* Works using OCR
+1. take a screenshot and crop mob name, save it to any file with .png extension
+    <p align="left">
+      <img src="docs/name_crop.png" alt="Crop example" />
+    </p>
+2. press "add mob"
+3. fill out the form
+    - Mob name (this name will be shown in the list)
+    - Location name (you can fill it in with any value, it just serves for convenience)
+    - Image file (select the image file that you cropped earlier)
+    - Height offset (the click area under the name, depends on the size of the mob and is usually in the range of 30 to 70)
+    - Element (select the mob element that you took a screenshot of)
+4. press "ok"
 
-**Foreground Farm**
+## select mob
 
-* :warning: Does not work very well :warning:
-* Farm bot that works on foreground
-* Works moving the mouse on the screen to see if it finds a monster
-* Works matching pixel colors
+The next stage is choosing which mobs will be used to search in the game
+1. press "select mobs"
+2. find the mobs you added earlier
+3. select them
+4. press "ok"
 
-**Recording Bot**
+## turn on the bot
 
-* :warning: Does not work very well :warning:
-* It records your actions like moving, attacking, drinking potions and etc.
-* Generates a file that you can use to replay your actions
-* Works on background or foreground
+1. run the game
+2. place your autoattack (or attack skill) to F1 hotkey
+3. press "attach window" and select your game window from list
+4. press "start" or use hotkey `alt+s` to stop
 
+## add new types (elements)
 
-### Built With
+If your game uses custom element icons, you can add them
+1. take a screenshot and crop element icon, save it as .png
+2. press "add type"
+3. fill type name and select icon image
+Now you can choose a custom element when adding mobs
 
-* [Python3](https://www.python.org/) - A general-purpose, high-level programming language
-* [OpenCV](https://opencv.org/) - Open source computer vision library
-* [pytesseract](https://pypi.org/project/pytesseract/) - Google's Tesseract OCR library
-* [pyttsx3](https://pypi.org/project/pyttsx3/) - Speech synthesis library
-* [numpy](https://www.numpy.org/) - Scientific computing package
+P.S: It is not necessary to use the element icon specifically, it can be any marker of the selected target, the main requirement is that it does not change during the fight
 
+## autohotkeys
 
-## Getting Started
+Here is the list of F-buttons for which you can set the press interval.
 
-To get a local copy up and running follow these simple steps.
+The minimum interval is 100ms (if you set a lower value, this value will work as 100)
 
-### Installation
+when the "enable hotkey" check box is on and bot started the following keys will be pressed at the specified interval
 
-1. Clone the repo
-  ```sh
-  git clone https://github.com/xandao-dev/flyff-bots.git
-  ```
+# Does it work with universe?
 
-2. Install dependencies
-  ```sh
-  cd flyff-bots
-  python3 -m pip install -r requirements.txt
-  ```
+Currently nope. But I have some thoughts on how to make it work 
 
-### Common Issues
-
-1. `import win32gui ImportError: DLL load failed: The specified module could not be found.`
-    * Install [pywin32](https://github.com/mhammond/pywin32/releases) from binaries for your python version
-
-## Usage
-
-* Run foreground vision bot
-
-  1. Follow the [configuration](./foreground_vision_bot/docs/README.md) steps to configure the bot
-  2. Run the bot: `python3 foreground_vision_farm.py`
-
-* Run awakening bot
-
-  1. Open the game
-  2. Run the bot: `python3 background_awake.py`
-
-* Run foreground farm
-
-  1. Open the game
-  2. Run the bot: `python3 foreground_farm.py`
-
-* Run recording bot
-
-  1. Open the game
-  2. Run the recorder: `python3 recorder.py` or `python3 recorder_no_mouse.py`
-  3. Run the playback: `python3 foreground_playback.py` or `python3 background_playback.py`
-
-## Roadmap
-
-See the [open issues](https://github.com/xandao-dev/flyff-bots/issues) for a list of proposed features (and known issues).
-
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
+# License
 
 Distributed under the MIT License. See [LICENSE](./LICENSE.md) for more information.
-
-Free software =)
-
-## Contact
-
-Alexandre Calil - [Linkedin](https://www.linkedin.com/in/xandao-dev/) - [alexandre@xandao.dev](mailto:alexandre@xandao.dev)
-
-Project Link: [https://github.com/xandao-dev/flyff-bots](https://github.com/xandao-dev/flyff-bots)
