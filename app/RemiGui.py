@@ -33,7 +33,7 @@ from key_sender import send_to_window
 from pynput.keyboard import Key
 import shutil
 
-class RemiApp(App):
+class EnhancedFlyffBot(App):
     def __new__(cls, *args, **kwargs):
         instance = super().__new__(cls)
         instance.config_file = Path("app_config.json")
@@ -66,7 +66,7 @@ class RemiApp(App):
         res_path = os.path.join(os.path.dirname(__file__), 'static')
         self.show_bot_vision = False
         self.attached_window = None
-        super(RemiApp, self).__init__(*args, static_file_path={'static': res_path})
+        super(EnhancedFlyffBot, self).__init__(*args, static_file_path={'static': res_path})
 
     def load_config(self):
         """Load configuration from file"""
@@ -394,7 +394,7 @@ class RemiApp(App):
         """ Overloading App.on_close event to stop the Timer.
         """
         self.stop_flag = True
-        super(RemiApp, self).on_close()
+        super(EnhancedFlyffBot, self).on_close()
 
     def open_attach_window_popup(self, widget):
         # Create a dialog window
